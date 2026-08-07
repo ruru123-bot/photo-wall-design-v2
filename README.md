@@ -21,8 +21,9 @@ This starter does not use `wrangler.jsonc`.
 ## Included Shape
 
 - edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
+- `.openai/hosting.json` keeps Sites hosting metadata without paid storage bindings
+- template images are uploaded to Cloudinary through server-side API routes
+- Cloudinary and admin credentials are supplied as encrypted Worker secrets
 - `db/schema.ts` starts intentionally empty
 - `examples/d1/` contains an optional D1 example surface
 - `drizzle.config.ts` supports local migration generation when needed

@@ -4,12 +4,6 @@
   "main": "worker/index.ts",
   "compatibility_date": "2026-05-15",
   "compatibility_flags": ["nodejs_compat"],
-  "r2_buckets": [
-    {
-      "binding": "MEDIA",
-      "bucket_name": "photo-wall-design-media"
-    }
-  ],
   "observability": {
     "enabled": true
   }

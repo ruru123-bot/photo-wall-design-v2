@@ -53,12 +53,14 @@ test("protects the Cloudflare template management routes", async () => {
 });
 
 test("keeps the repository configured for the current Workers deployment", async () => {
-  const [page, layout, hero, worker, wrangler, packageJson] = await Promise.all([
+  const [page, layout, hero, worker, storage, wrangler, hosting, packageJson] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/HeroVideo.tsx", import.meta.url), "utf8"),
     readFile(new URL("../worker/index.ts", import.meta.url), "utf8"),
+    readFile(new URL("../lib/template-storage.ts", import.meta.url), "utf8"),
     readFile(new URL("../wrangler.jsonc", import.meta.url), "utf8"),
+    readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
   ]);
 
@@ -67,8 +69,15 @@ test("keeps the repository configured for the current Workers deployment", async
   assert.match(hero, /wedding-hero-mobile-h264-v13\.mp4/);
   assert.match(worker, /ADMIN_USERNAME/);
   assert.match(worker, /x-photo-wall-admin/);
+  assert.match(worker, /CLOUDINARY_CLOUD_NAME/);
+  assert.doesNotMatch(worker, /R2Bucket|MEDIA:/);
+  assert.match(storage, /api\.cloudinary\.com/);
+  assert.match(storage, /res\.cloudinary\.com/);
+  assert.match(storage, /q_auto:eco/);
+  assert.match(storage, /c_limit,w_/);
   assert.match(wrangler, /"name": "photo-wall-design"/);
-  assert.match(wrangler, /"bucket_name": "photo-wall-design-media"/);
+  assert.doesNotMatch(wrangler, /r2_buckets|photo-wall-design-media/);
+  assert.match(hosting, /"r2": null/);
   assert.match(packageJson, /"deploy:cloudflare"/);
   assert.match(packageJson, /prepare-cloudflare-deploy\.mjs/);
 });

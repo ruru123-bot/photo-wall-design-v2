@@ -1,20 +1,17 @@
 import {
   AdminAccessError,
-  getMediaBucket,
+  deleteTemplateAsset,
   isTemplateSize,
   isTemplateStyle,
   listTemplateAssets,
   requireTemplateAdmin,
+  uploadTemplateAsset,
 } from "@/lib/template-storage";
 
 export const dynamic = "force-dynamic";
 
-const allowedTypes = new Map([
-  ["image/jpeg", "jpg"],
-  ["image/png", "png"],
-  ["image/webp", "webp"],
-]);
-const maxUploadBytes = 15 * 1024 * 1024;
+const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+const maxUploadBytes = 10 * 1024 * 1024;
 
 export async function GET() {
   try {
@@ -41,27 +38,21 @@ export async function POST(request: Request) {
     if (!(file instanceof File) || file.size === 0) {
       return Response.json({ error: "请选择需要上传的图片。" }, { status: 400 });
     }
-    const extension = allowedTypes.get(file.type);
-    if (!extension) {
+    if (!allowedTypes.has(file.type)) {
       return Response.json({ error: "仅支持 JPG、PNG 和 WebP 图片。" }, { status: 400 });
     }
     if (file.size > maxUploadBytes) {
-      return Response.json({ error: "单张图片不能超过 15MB。" }, { status: 400 });
+      return Response.json({ error: "Cloudinary 免费方案要求单张图片不超过 10MB。" }, { status: 400 });
     }
 
-    const uploadedAt = new Date().toISOString();
-    const key = `templates/${style}/${size}/${Date.now()}-${crypto.randomUUID()}.${extension}`;
-    await getMediaBucket().put(key, await file.arrayBuffer(), {
-      httpMetadata: { contentType: file.type },
-      customMetadata: {
-        title: encodeURIComponent(title),
-        uploadedAt,
-        uploader: encodeURIComponent(user.email),
-      },
+    const template = await uploadTemplateAsset({
+      file,
+      style,
+      size,
+      title,
+      uploader: user.email,
     });
-
-    const templates = await listTemplateAssets({ style, size });
-    return Response.json({ template: templates.find((item) => item.key === key) }, { status: 201 });
+    return Response.json({ template }, { status: 201 });
   } catch (error) {
     return adminErrorResponse(error);
   }
@@ -71,11 +62,11 @@ export async function DELETE(request: Request) {
   try {
     await requireTemplateAdmin();
     const key = new URL(request.url).searchParams.get("key");
-    if (!key || !key.startsWith("templates/") || key.includes("..")) {
+    if (!key) {
       return Response.json({ error: "无效的模板图片。" }, { status: 400 });
     }
 
-    await getMediaBucket().delete(key);
+    await deleteTemplateAsset(key);
     return Response.json({ ok: true });
   } catch (error) {
     return adminErrorResponse(error);

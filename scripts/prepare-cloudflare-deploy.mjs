@@ -12,12 +12,6 @@ const cloudflareConfig = {
   assets: {
     directory: "../client",
   },
-  r2_buckets: [
-    {
-      binding: "MEDIA",
-      bucket_name: "photo-wall-design-media",
-    },
-  ],
   rules: [
     {
       type: "ESModule",

@@ -138,7 +138,7 @@ export default function AdminDashboard({ displayName, email }: { displayName: st
           <label className="admin-file-field">
             <span>模板图片</span>
             <input name="file" type="file" accept="image/jpeg,image/png,image/webp" required />
-            <small>支持 JPG、PNG、WebP，单张不超过 15MB</small>
+            <small>支持 JPG、PNG、WebP，单张不超过 10MB</small>
           </label>
           <button className="admin-submit" type="submit" disabled={submitting}>
             {submitting ? "正在上传…" : "上传并发布到预览"}
