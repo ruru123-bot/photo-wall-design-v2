@@ -113,6 +113,10 @@ test("keeps the repository configured for the current Workers deployment", async
   assert.match(page, /href=\{`\/preview\?style=/);
   assert.match(preview, /cache: "no-store"/);
   assert.doesNotMatch(preview, /sessionStorage/);
+  assert.match(preview, /左右滑看/);
+  assert.match(preview, /多排查看/);
+  assert.match(preview, /template-lightbox/);
+  assert.match(preview, /finishMainSwipe/);
   assert.match(adminDashboard, /正在自动优化/);
   assert.match(adminDashboard, /上传成功！/);
   assert.match(adminDashboard, /optimizeTemplateImage/);
