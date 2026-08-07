@@ -41,6 +41,7 @@ export default function AdminDashboard({ displayName, email }: { displayName: st
   const loadTemplates = useCallback(async () => {
     try {
       const response = await fetch("/api/admin/templates", { cache: "no-store" });
+      if (redirectToLoginIfNeeded(response)) return;
       const payload = await response.json() as { templates?: TemplateAsset[]; error?: string };
       if (!response.ok) throw new Error(payload.error || "读取模板失败。");
       setTemplates(payload.templates || []);
@@ -70,6 +71,7 @@ export default function AdminDashboard({ displayName, email }: { displayName: st
 
     try {
       const response = await fetch("/api/admin/templates", { method: "POST", body: data });
+      if (redirectToLoginIfNeeded(response)) return;
       const payload = await response.json() as { template?: TemplateAsset; error?: string };
       if (!response.ok) throw new Error(payload.error || "上传失败。");
       form.reset();
@@ -93,6 +95,7 @@ export default function AdminDashboard({ displayName, email }: { displayName: st
 
     try {
       const response = await fetch(`/api/admin/templates?key=${encodeURIComponent(item.key)}`, { method: "DELETE" });
+      if (redirectToLoginIfNeeded(response)) return;
       const payload = await response.json() as { error?: string };
       if (!response.ok) throw new Error(payload.error || "删除失败。");
       setTemplates((current) => current.filter((template) => template.key !== item.key));
@@ -192,4 +195,10 @@ export default function AdminDashboard({ displayName, email }: { displayName: st
       </section>
     </main>
   );
+}
+
+function redirectToLoginIfNeeded(response: Response) {
+  if (response.status !== 401) return false;
+  window.location.assign("/admin/login");
+  return true;
 }

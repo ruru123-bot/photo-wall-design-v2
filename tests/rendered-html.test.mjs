@@ -9,7 +9,9 @@ async function requestSite(pathname = "/", options = {}) {
 
   return worker.fetch(
     new Request(`https://photo-wall-design.example${pathname}`, {
+      method: options.method ?? "GET",
       headers: { accept: "text/html", ...options.headers },
+      body: options.body,
     }),
     {
       ASSETS: {
@@ -40,16 +42,55 @@ test("server-renders the current mobile wedding photo wall homepage", async () =
 });
 
 test("protects the Cloudflare template management routes", async () => {
-  const response = await requestSite("/admin", {
+  const env = {
+    ADMIN_USERNAME: "admin",
+    ADMIN_PASSWORD: "correct-password",
+  };
+  const response = await requestSite("/admin", { env });
+
+  assert.equal(response.status, 303);
+  assert.equal(response.headers.get("location"), "https://photo-wall-design.example/admin/login");
+  assert.equal(response.headers.get("www-authenticate"), null);
+
+  const loginPage = await requestSite("/admin/login", { env });
+  assert.equal(loginPage.status, 200);
+  assert.match(await loginPage.text(), /模板管理后台/);
+
+  const failedLogin = await requestSite("/admin/login", {
+    method: "POST",
+    body: new URLSearchParams({ username: "admin", password: "wrong" }),
+    env,
+  });
+  assert.equal(failedLogin.status, 401);
+  assert.equal(failedLogin.headers.get("www-authenticate"), null);
+  assert.match(await failedLogin.text(), /账号或密码不正确/);
+
+  const login = await requestSite("/admin/login", {
+    method: "POST",
+    body: new URLSearchParams({
+      username: "admin",
+      password: "correct-password",
+    }),
+    env,
+  });
+  assert.equal(login.status, 303);
+  assert.equal(login.headers.get("location"), "/admin");
+  const sessionCookie = login.headers.get("set-cookie")?.split(";", 1)[0];
+  assert.match(sessionCookie ?? "", /^__Host-photo_wall_admin=/);
+
+  const authenticated = await requestSite("/admin", {
+    headers: { cookie: sessionCookie },
+    env,
+  });
+  assert.equal(authenticated.status, 200);
+
+  const apiResponse = await requestSite("/api/admin/templates", {
     env: {
-      ADMIN_USERNAME: "admin",
-      ADMIN_PASSWORD: "correct-password",
+      ...env,
     },
   });
-
-  assert.equal(response.status, 401);
-  assert.match(response.headers.get("www-authenticate") ?? "", /^Basic\b/);
-  assert.match(await response.text(), /需要管理员账号/);
+  assert.equal(apiResponse.status, 401);
+  assert.match(apiResponse.headers.get("content-type") ?? "", /^application\/json\b/);
 });
 
 test("keeps the repository configured for the current Workers deployment", async () => {
