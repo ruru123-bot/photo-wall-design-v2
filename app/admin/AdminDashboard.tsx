@@ -13,6 +13,12 @@ type TemplateAsset = {
   adminUrl?: string;
 };
 
+type NoticeTone = "info" | "success" | "error";
+
+const maxUploadBytes = 10 * 1024 * 1024;
+const targetUploadBytes = 9 * 1024 * 1024;
+const maxSourceBytes = 40 * 1024 * 1024;
+
 const styleOptions = [
   ["cute", "卡通可爱风"],
   ["gradient", "渐变小众风"],
@@ -35,6 +41,8 @@ export default function AdminDashboard({ displayName, email }: { displayName: st
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
+  const [messageTone, setMessageTone] = useState<NoticeTone>("info");
+  const [selectedFileText, setSelectedFileText] = useState("");
   const [filterStyle, setFilterStyle] = useState("all");
   const [filterSize, setFilterSize] = useState("all");
 
@@ -47,6 +55,7 @@ export default function AdminDashboard({ displayName, email }: { displayName: st
       setTemplates(payload.templates || []);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "读取模板失败。");
+      setMessageTone("error");
     } finally {
       setLoading(false);
     }
@@ -68,22 +77,46 @@ export default function AdminDashboard({ displayName, email }: { displayName: st
     const data = new FormData(form);
     setSubmitting(true);
     setMessage("正在上传图片…");
+    setMessageTone("info");
 
     try {
+      const originalFile = data.get("file");
+      if (!(originalFile instanceof File) || originalFile.size === 0) {
+        throw new Error("请先选择需要上传的图片。");
+      }
+      if (originalFile.size > maxSourceBytes) {
+        throw new Error("源图片超过 40MB，请先导出较小版本后再上传。");
+      }
+
+      let uploadFile = originalFile;
+      let optimized = false;
+      if (originalFile.size > maxUploadBytes) {
+        setMessage(`图片有 ${formatFileSize(originalFile.size)}，正在自动优化，请稍候…`);
+        uploadFile = await optimizeTemplateImage(originalFile);
+        optimized = uploadFile !== originalFile;
+        data.set("file", uploadFile, uploadFile.name);
+      }
+
       const response = await fetch("/api/admin/templates", { method: "POST", body: data });
       if (redirectToLoginIfNeeded(response)) return;
-      const payload = await response.json() as { template?: TemplateAsset; error?: string };
+      const payload = await readApiPayload<{ template?: TemplateAsset; error?: string }>(response);
       if (!response.ok) throw new Error(payload.error || "上传失败。");
+      if (!payload.template) throw new Error("图片已上传，但没有收到模板信息，请刷新图库重试。");
       form.reset();
-      if (payload.template) {
-        setTemplates((current) => [
-          payload.template!,
-          ...current.filter((item) => item.key !== payload.template!.key),
-        ]);
-      }
-      setMessage("上传成功，图片已经进入对应尺寸的预览页面。");
+      setSelectedFileText("");
+      setTemplates((current) => [
+        payload.template!,
+        ...current.filter((item) => item.key !== payload.template!.key),
+      ]);
+      setMessage(
+        optimized
+          ? `上传成功！大图已自动优化为 ${formatFileSize(uploadFile.size)}，并进入对应尺寸预览。`
+          : "上传成功！图片已经进入对应尺寸的预览页面。",
+      );
+      setMessageTone("success");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "上传失败。");
+      setMessageTone("error");
     } finally {
       setSubmitting(false);
     }
@@ -92,16 +125,19 @@ export default function AdminDashboard({ displayName, email }: { displayName: st
   const deleteTemplate = async (item: TemplateAsset) => {
     if (!window.confirm(`确定删除“${item.title}”吗？删除后无法恢复。`)) return;
     setMessage("正在删除…");
+    setMessageTone("info");
 
     try {
       const response = await fetch(`/api/admin/templates?key=${encodeURIComponent(item.key)}`, { method: "DELETE" });
       if (redirectToLoginIfNeeded(response)) return;
-      const payload = await response.json() as { error?: string };
+      const payload = await readApiPayload<{ error?: string }>(response);
       if (!response.ok) throw new Error(payload.error || "删除失败。");
       setTemplates((current) => current.filter((template) => template.key !== item.key));
       setMessage("模板已删除。");
+      setMessageTone("success");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "删除失败。");
+      setMessageTone("error");
     }
   };
 
@@ -147,14 +183,26 @@ export default function AdminDashboard({ displayName, email }: { displayName: st
           </div>
           <label className="admin-file-field">
             <span>模板图片</span>
-            <input name="file" type="file" accept="image/jpeg,image/png,image/webp" required />
-            <small>支持 JPG、PNG、WebP，单张不超过 10MB</small>
+            <input
+              name="file"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              required
+              onChange={(event) => {
+                const file = event.currentTarget.files?.[0];
+                setSelectedFileText(file
+                  ? `${file.name} · ${formatFileSize(file.size)}${file.size > maxUploadBytes ? " · 上传时自动优化" : ""}`
+                  : "");
+              }}
+            />
+            <small>支持 JPG、PNG、WebP；超过 10MB 会自动优化后上传</small>
+            {selectedFileText && <strong className="admin-selected-file">{selectedFileText}</strong>}
           </label>
           <button className="admin-submit" type="submit" disabled={submitting}>
             {submitting ? "正在上传…" : "上传并发布到预览"}
           </button>
         </form>
-        {message && <p className="admin-message" role="status">{message}</p>}
+        {message && <p className="admin-message" data-tone={messageTone} role="status" aria-live="polite">{message}</p>}
       </section>
 
       <section className="admin-panel admin-library-panel">
@@ -201,4 +249,78 @@ function redirectToLoginIfNeeded(response: Response) {
   if (response.status !== 401) return false;
   window.location.assign("/admin/login");
   return true;
+}
+
+async function readApiPayload<T>(response: Response): Promise<T> {
+  const text = await response.text();
+  if (!text) return {} as T;
+
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    throw new Error(response.ok
+      ? "服务器返回了无法识别的上传结果，请刷新后重试。"
+      : `上传失败（${response.status}），请稍后重试。`);
+  }
+}
+
+async function optimizeTemplateImage(file: File): Promise<File> {
+  if (!file.type.startsWith("image/")) throw new Error("请选择 JPG、PNG 或 WebP 图片。");
+
+  let bitmap: ImageBitmap;
+  try {
+    bitmap = await createImageBitmap(file);
+  } catch {
+    throw new Error("无法读取这张图片，请重新导出为 JPG、PNG 或 WebP 后再试。");
+  }
+
+  try {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d", { alpha: false });
+    if (!context) throw new Error("当前浏览器无法处理大图，请先压缩后再上传。");
+
+    const longestSide = Math.max(bitmap.width, bitmap.height);
+    const startingScale = Math.min(1, 4096 / longestSide);
+    const dimensionScales = [startingScale, startingScale * 0.86, startingScale * 0.72, startingScale * 0.6];
+    const qualities = [0.9, 0.82, 0.74, 0.66];
+    let smallestBlob: Blob | null = null;
+
+    for (const scale of dimensionScales) {
+      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+
+      for (const quality of qualities) {
+        const blob = await canvasToBlob(canvas, "image/webp", quality);
+        if (!smallestBlob || blob.size < smallestBlob.size) smallestBlob = blob;
+        if (blob.size <= targetUploadBytes) return webpFile(blob, file.name);
+      }
+    }
+
+    if (smallestBlob && smallestBlob.size <= maxUploadBytes) return webpFile(smallestBlob, file.name);
+    throw new Error("图片优化后仍超过 10MB，请先导出为尺寸较小的 JPG 或 WebP。");
+  } finally {
+    bitmap.close();
+  }
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number) {
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) resolve(blob);
+      else reject(new Error("图片优化失败，请换一张图片重试。"));
+    }, type, quality);
+  });
+}
+
+function webpFile(blob: Blob, originalName: string) {
+  const baseName = originalName.replace(/\.[^.]+$/, "") || "template";
+  return new File([blob], `${baseName}.webp`, { type: "image/webp", lastModified: Date.now() });
+}
+
+function formatFileSize(bytes: number) {
+  if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))}KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
 }

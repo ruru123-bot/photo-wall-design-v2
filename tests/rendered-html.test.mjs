@@ -94,9 +94,10 @@ test("protects the Cloudflare template management routes", async () => {
 });
 
 test("keeps the repository configured for the current Workers deployment", async () => {
-  const [page, preview, publicTemplatesApi, layout, hero, worker, storage, wrangler, hosting, packageJson] = await Promise.all([
+  const [page, preview, adminDashboard, publicTemplatesApi, layout, hero, worker, storage, wrangler, hosting, packageJson] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/preview/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/admin/AdminDashboard.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/templates/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/layout.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/HeroVideo.tsx", import.meta.url), "utf8"),
@@ -112,6 +113,9 @@ test("keeps the repository configured for the current Workers deployment", async
   assert.match(page, /href=\{`\/preview\?style=/);
   assert.match(preview, /cache: "no-store"/);
   assert.doesNotMatch(preview, /sessionStorage/);
+  assert.match(adminDashboard, /正在自动优化/);
+  assert.match(adminDashboard, /上传成功！/);
+  assert.match(adminDashboard, /optimizeTemplateImage/);
   assert.match(publicTemplatesApi, /"Cache-Control": "no-store, max-age=0"/);
   assert.match(layout, /婚礼模板与打印定制/);
   assert.match(hero, /wedding-hero-mobile-h264-v13\.mp4/);
