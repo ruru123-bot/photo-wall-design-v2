@@ -13,7 +13,13 @@ export async function GET(request: Request) {
 
     if (!key) return new Response("Invalid media key", { status: 400 });
 
-    return Response.redirect(getTemplateDeliveryUrl(key, width), 302);
+    return new Response(null, {
+      status: 302,
+      headers: {
+        "Cache-Control": "public, max-age=86400, immutable",
+        Location: getTemplateDeliveryUrl(key, width),
+      },
+    });
   } catch (error) {
     return new Response(error instanceof Error ? error.message : "Invalid media key", {
       status: 400,

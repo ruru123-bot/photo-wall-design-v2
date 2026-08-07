@@ -94,7 +94,7 @@ test("protects the Cloudflare template management routes", async () => {
 });
 
 test("keeps the repository configured for the current Workers deployment", async () => {
-  const [page, preview, adminDashboard, publicTemplatesApi, layout, hero, worker, storage, wrangler, hosting, packageJson] = await Promise.all([
+  const [page, preview, adminDashboard, publicTemplatesApi, layout, hero, worker, storage, templateCache, mediaApi, wrangler, hosting, packageJson] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/preview/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/admin/AdminDashboard.tsx", import.meta.url), "utf8"),
@@ -103,6 +103,8 @@ test("keeps the repository configured for the current Workers deployment", async
     readFile(new URL("../app/HeroVideo.tsx", import.meta.url), "utf8"),
     readFile(new URL("../worker/index.ts", import.meta.url), "utf8"),
     readFile(new URL("../lib/template-storage.ts", import.meta.url), "utf8"),
+    readFile(new URL("../lib/template-cache.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/media/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../wrangler.jsonc", import.meta.url), "utf8"),
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
@@ -111,7 +113,8 @@ test("keeps the repository configured for the current Workers deployment", async
   assert.match(page, /匠心照片墙设计/);
   assert.doesNotMatch(page, /next\/link/);
   assert.match(page, /href=\{`\/preview\?style=/);
-  assert.match(preview, /cache: "no-store"/);
+  assert.match(preview, /cache: "default"/);
+  assert.doesNotMatch(preview, /fresh=\$\{Date\.now\(\)\}/);
   assert.doesNotMatch(preview, /sessionStorage/);
   assert.match(preview, /左右滑看/);
   assert.match(preview, /多排查看/);
@@ -120,9 +123,15 @@ test("keeps the repository configured for the current Workers deployment", async
   assert.match(adminDashboard, /正在自动优化/);
   assert.match(adminDashboard, /上传成功！/);
   assert.match(adminDashboard, /optimizeTemplateImage/);
-  assert.match(publicTemplatesApi, /"Cache-Control": "no-store, max-age=0"/);
+  assert.match(publicTemplatesApi, /readPublicTemplateCache/);
+  assert.match(publicTemplatesApi, /CDN-Cache-Control/);
+  assert.match(publicTemplatesApi, /gridUrl/);
+  assert.match(publicTemplatesApi, /fullUrl/);
   assert.match(layout, /婚礼模板与打印定制/);
+  assert.match(layout, /https:\/\/jiangxinsheji\.icu/);
+  assert.doesNotMatch(layout, /rel="preload"/);
   assert.match(hero, /wedding-hero-mobile-h264-v13\.mp4/);
+  assert.match(hero, /IntersectionObserver/);
   assert.match(worker, /ADMIN_USERNAME/);
   assert.match(worker, /x-photo-wall-admin/);
   assert.match(worker, /CLOUDINARY_CLOUD_NAME/);
@@ -133,6 +142,9 @@ test("keeps the repository configured for the current Workers deployment", async
   assert.match(storage, /q_auto:eco/);
   assert.match(storage, /c_limit,w_/);
   assert.match(storage, /__PHOTO_WALL_ENV__/);
+  assert.match(templateCache, /caches\?\.default/);
+  assert.match(templateCache, /TEMPLATE_CACHE_TTL_SECONDS/);
+  assert.match(mediaApi, /max-age=86400, immutable/);
   assert.match(wrangler, /"name": "photo-wall-design"/);
   assert.doesNotMatch(wrangler, /r2_buckets|photo-wall-design-media/);
   assert.match(hosting, /"r2": null/);

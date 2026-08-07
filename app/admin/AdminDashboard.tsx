@@ -143,6 +143,8 @@ export default function AdminDashboard({ displayName, email }: { displayName: st
 
   return (
     <main className="admin-page">
+      <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+      <link rel="dns-prefetch" href="https://res.cloudinary.com" />
       <header className="admin-header">
         <div>
           <Link className="admin-brand" href="/">匠心设计 <small>ARTISAN DESIGN</small></Link>

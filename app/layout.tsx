@@ -9,7 +9,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.SITE_URL || "http://localhost:3000"),
+  metadataBase: new URL(process.env.SITE_URL || "https://jiangxinsheji.icu"),
   title: "匠心照片墙设计｜婚礼模板与打印定制",
   description: "从照片排版、视觉设计到高清打印，为每一场婚礼定制独一无二的幸福记忆。",
   openGraph: {
@@ -30,15 +30,6 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="zh-CN">
-      <head>
-        <link
-          rel="preload"
-          as="image"
-          href="/images/wedding-photo-wall-hero-optimized.webp"
-          type="image/webp"
-          fetchPriority="high"
-        />
-      </head>
       <body>{children}</body>
     </html>
   );

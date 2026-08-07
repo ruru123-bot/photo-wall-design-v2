@@ -198,8 +198,7 @@ main {
 }
 .hero-video-fallback {
   background: #e7dfd2 url("/images/wedding-photo-wall-hero-optimized.webp") center / cover no-repeat;
-  animation: hero-fallback-motion 7s ease-in-out infinite alternate;
-  transform: scale(1.035);
+  transform: scale(1.02);
 }
 .hero-video {
   object-fit: cover;
@@ -208,11 +207,7 @@ main {
   transition: opacity .25s ease;
 }
 .hero-media.is-playing .hero-video { opacity: 1; }
-.hero-media.is-playing .hero-video-fallback { animation: none; transform: scale(1.035); }
-@keyframes hero-fallback-motion {
-  from { transform: scale(1.035); }
-  to { transform: scale(1.075); }
-}
+.hero-media.is-playing .hero-video-fallback { transform: scale(1.02); }
 .hero-wash {
   position: absolute;
   z-index: 1;
@@ -594,7 +589,7 @@ main {
 .uploaded-wall-open img { display: block; width: 100%; height: 100%; object-fit: contain; user-select: none; -webkit-user-drag: none; }
 .preview-zoom-hint { position: absolute; z-index: 3; top: 8px; right: 8px; display: inline-flex; min-height: 28px; align-items: center; padding: 0 10px; border: 1px solid rgba(255,255,255,.34); border-radius: 16px; background: rgba(45,37,30,.72); color: #fff; font-size: 9px; letter-spacing: .08em; pointer-events: none; }
 .uploaded-wall-preview figcaption { position: absolute; right: 9px; bottom: 8px; left: 9px; padding: 7px 10px; background: rgba(49,40,32,.78); color: #fffdf8; font-size: 10px; text-align: center; letter-spacing: .06em; }
-.preview-carousel-arrow { position: absolute; z-index: 8; top: 50%; display: grid; width: 46px; height: 46px; margin-top: -23px; place-items: center; cursor: pointer; border: 1px solid rgba(255,255,255,.48); border-radius: 50%; background: rgba(47,38,31,.72); color: #fff; font: 300 34px/1 Arial, sans-serif; box-shadow: 0 8px 22px rgba(45,35,27,.24); backdrop-filter: blur(8px); }
+.preview-carousel-arrow { position: absolute; z-index: 8; top: 50%; display: grid; width: 46px; height: 46px; margin-top: -23px; place-items: center; cursor: pointer; border: 1px solid rgba(255,255,255,.48); border-radius: 50%; background: rgba(47,38,31,.86); color: #fff; font: 300 34px/1 Arial, sans-serif; box-shadow: 0 8px 22px rgba(45,35,27,.24); }
 .preview-carousel-arrow.is-previous { left: 7px; }
 .preview-carousel-arrow.is-next { right: 7px; }
 .preview-swipe-hint { margin: 16px 0 0; color: #796957; font-size: 10px; letter-spacing: .07em; }
@@ -645,12 +640,20 @@ main {
 .template-lightbox-help { margin: 12px 0 0; color: #c2b5a5; font-size: 9px; text-align: center; letter-spacing: .07em; }
 
 @supports (content-visibility: auto) {
+  .template-card,
+  .preview-template-grid > button,
+  .admin-template-card {
+    content-visibility: auto;
+  }
+  .template-card { contain-intrinsic-size: 680px; }
+  .preview-template-grid > button { contain-intrinsic-size: 290px; }
+  .admin-template-card { contain-intrinsic-size: 360px; }
   .process-step { content-visibility: auto; }
   .process-step { contain-intrinsic-size: 126px; }
 }
 
 .admin-page { min-height: 100svh; padding-bottom: 64px; background: linear-gradient(180deg, #f8f4ed, #eee5d9); }
-.admin-header { position: sticky; z-index: 30; top: 0; display: flex; min-height: 76px; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--line); background: rgba(250,247,241,.9); backdrop-filter: blur(16px); }
+.admin-header { position: sticky; z-index: 30; top: 0; display: flex; min-height: 76px; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--line); background: rgba(250,247,241,.98); }
 .admin-brand { display: flex; flex-direction: column; color: #826d4d; font: 500 17px/1.05 "Songti SC", serif; letter-spacing: .12em; }
 .admin-brand small { margin-top: 4px; color: #aa8f64; font: 500 6px/1 Arial, sans-serif; letter-spacing: .15em; }
 .admin-header > div > p { margin: 8px 0 0; color: #796a5d; font-size: 10px; letter-spacing: .1em; }
@@ -708,5 +711,4 @@ main {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition-duration: .01ms !important; }
-  .hero-video-fallback { animation: none; }
 }

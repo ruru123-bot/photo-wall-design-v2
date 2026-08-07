@@ -22,6 +22,7 @@ export default function HeroVideo() {
     video.setAttribute("muted", "");
 
     let attempts = 0;
+    let isInViewport = true;
     let retryTimer: number | undefined;
     const scheduleRetry = () => {
       if (retryTimer !== undefined || attempts >= 8) return;
@@ -31,7 +32,7 @@ export default function HeroVideo() {
       }, 700);
     };
     const tryPlay = () => {
-      if (!video.paused || attempts >= 8) return;
+      if (document.hidden || !isInViewport || !video.paused || attempts >= 8) return;
       attempts += 1;
       void video.play().catch(scheduleRetry);
     };
@@ -42,8 +43,20 @@ export default function HeroVideo() {
       if (retryTimer !== undefined) window.clearTimeout(retryTimer);
       retryTimer = undefined;
     };
+    const observer = "IntersectionObserver" in window
+      ? new IntersectionObserver(([entry]) => {
+          isInViewport = entry.isIntersecting;
+          if (isInViewport) {
+            tryPlay();
+          } else {
+            stopRetrying();
+            video.pause();
+          }
+        }, { threshold: 0.05 })
+      : null;
 
     tryPlay();
+    observer?.observe(video);
     window.addEventListener("pageshow", tryPlay);
     document.addEventListener("visibilitychange", resumeWhenVisible);
     document.addEventListener("WeixinJSBridgeReady", tryPlay);
@@ -52,6 +65,7 @@ export default function HeroVideo() {
 
     return () => {
       stopRetrying();
+      observer?.disconnect();
       window.removeEventListener("pageshow", tryPlay);
       document.removeEventListener("visibilitychange", resumeWhenVisible);
       document.removeEventListener("WeixinJSBridgeReady", tryPlay);

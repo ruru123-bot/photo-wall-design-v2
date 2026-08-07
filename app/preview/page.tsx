@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
 
 const styles = {
   cute: { title: "卡通可爱风", english: "PLAYFUL WEDDING" },
@@ -26,9 +25,10 @@ type TemplateAsset = {
   key: string;
   title: string;
   uploadedAt: string;
-  url: string;
-  previewUrl?: string;
-  thumbnailUrl?: string;
+  previewUrl: string;
+  thumbnailUrl: string;
+  gridUrl: string;
+  fullUrl: string;
 };
 
 function isStyleKey(value: string | null): value is StyleKey {
@@ -62,8 +62,9 @@ export default function PreviewPage() {
   useEffect(() => {
     const controller = new AbortController();
 
-    fetch(`/api/templates?style=${selection.style}&size=${selection.size}&fresh=${Date.now()}`, {
-      cache: "no-store",
+    fetch(`/api/templates?style=${selection.style}&size=${selection.size}`, {
+      cache: "default",
+      headers: { Accept: "application/json" },
       signal: controller.signal,
     })
       .then(async (response) => {
@@ -89,23 +90,23 @@ export default function PreviewPage() {
   const lightboxTemplate = lightboxIndex === null ? null : templates[lightboxIndex];
 
   useEffect(() => {
-    if (templates.length < 2) return;
+    if (!mainImageLoaded || templates.length < 2) return;
+
+    const connection = (navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    }).connection;
+    if (connection?.saveData || connection?.effectiveType === "2g") return;
 
     const timer = window.setTimeout(() => {
-      const nearbyIndexes = [
-        (activeTemplate - 1 + templates.length) % templates.length,
-        (activeTemplate + 1) % templates.length,
-      ];
-      nearbyIndexes.forEach((index) => {
-        const template = templates[index];
-        if (!template) return;
-        const image = new Image();
-        image.src = template.previewUrl || `${template.url}&w=960`;
-      });
-    }, 120);
+      const template = templates[(activeTemplate + 1) % templates.length];
+      if (!template) return;
+      const image = new Image();
+      image.decoding = "async";
+      image.src = template.previewUrl;
+    }, 650);
 
     return () => window.clearTimeout(timer);
-  }, [activeTemplate, templates]);
+  }, [activeTemplate, mainImageLoaded, templates]);
 
   useEffect(() => {
     if (lightboxIndex === null) return;
@@ -137,7 +138,8 @@ export default function PreviewPage() {
     const template = templates[index];
     if (!template) return;
     const image = new Image();
-    image.src = template.previewUrl || `${template.url}&w=960`;
+    image.decoding = "async";
+    image.src = template.previewUrl;
   };
 
   const selectTemplate = (index: number) => {
@@ -193,11 +195,15 @@ export default function PreviewPage() {
 
   return (
     <main className={`preview-page preview-page-${selection.style}`} data-size={selection.size}>
+      <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+      <link rel="dns-prefetch" href="https://res.cloudinary.com" />
       <header className="preview-header">
         <button className="preview-back" type="button" onClick={goBack} aria-label="返回模板选择">
           <span aria-hidden="true">←</span> 返回选择
         </button>
-        <Link className="preview-brand" href="/#top">匠心设计 <small>ARTISAN DESIGN</small></Link>
+        {/* A normal anchor avoids loading the client router just for this back-to-home link. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+        <a className="preview-brand" href="/#top">匠心设计 <small>ARTISAN DESIGN</small></a>
       </header>
 
       <section className="preview-intro">
@@ -228,9 +234,12 @@ export default function PreviewPage() {
               <button type="button" key={template.key} onClick={() => openLightbox(index)}>
                 <span className="preview-grid-image">
                   <img
-                    src={`${template.url}&w=720`}
+                    src={template.gridUrl}
+                    srcSet={`${template.thumbnailUrl} 320w, ${template.gridUrl} 720w`}
+                    sizes="(max-width: 540px) calc(100vw - 76px), 464px"
                     alt={`${template.title}照片墙效果`}
-                    loading={index < 2 ? "eager" : "lazy"}
+                    loading={index === 0 ? "eager" : "lazy"}
+                    fetchPriority={index === 0 ? "high" : "low"}
                     decoding="async"
                   />
                   <i aria-hidden="true">＋</i>
@@ -280,7 +289,9 @@ export default function PreviewPage() {
                   >
                     <img
                       key={currentTemplate.key}
-                      src={currentTemplate.previewUrl || `${currentTemplate.url}&w=960`}
+                      src={currentTemplate.previewUrl}
+                      srcSet={`${currentTemplate.thumbnailUrl} 320w, ${currentTemplate.gridUrl} 720w, ${currentTemplate.previewUrl} 960w`}
+                      sizes="(max-width: 540px) calc(100vw - 56px), 484px"
                       alt={`${currentTemplate.title}照片墙效果`}
                       draggable={false}
                       decoding="async"
@@ -316,7 +327,13 @@ export default function PreviewPage() {
                     onPointerDown={() => preloadTemplate(index)}
                     onClick={() => selectTemplate(index)}
                   >
-                    <img src={template.thumbnailUrl || `${template.url}&w=320`} alt="" loading={index < 2 ? "eager" : "lazy"} decoding="async" />
+                    <img
+                      src={template.thumbnailUrl}
+                      alt=""
+                      loading="lazy"
+                      fetchPriority="low"
+                      decoding="async"
+                    />
                     <span>{template.title}</span>
                   </button>
                 ))}
@@ -350,7 +367,9 @@ export default function PreviewPage() {
             onPointerCancel={() => { lightboxSwipeStartX.current = null; }}
           >
             <img
-              src={`${lightboxTemplate.url}&w=2400`}
+              src={lightboxTemplate.fullUrl}
+              srcSet={`${lightboxTemplate.previewUrl} 960w, ${lightboxTemplate.fullUrl} 1800w`}
+              sizes="100vw"
               alt={`${lightboxTemplate.title}大图`}
               draggable={false}
               style={{ width: `${zoom * 100}%` }}

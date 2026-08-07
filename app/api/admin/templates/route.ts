@@ -7,6 +7,7 @@ import {
   requireTemplateAdmin,
   uploadTemplateAsset,
 } from "@/lib/template-storage";
+import { purgePublicTemplateCache } from "@/lib/template-cache";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +53,10 @@ export async function POST(request: Request) {
       title,
       uploader: user.email,
     });
+    await purgePublicTemplateCache(request.url, {
+      style: template.style,
+      size: template.size,
+    });
     return Response.json({ template }, { status: 201 });
   } catch (error) {
     return adminErrorResponse(error);
@@ -67,6 +72,12 @@ export async function DELETE(request: Request) {
     }
 
     await deleteTemplateAsset(key);
+    const [, style, size] = key.split("/");
+    if (isTemplateStyle(style) && isTemplateSize(size)) {
+      await purgePublicTemplateCache(request.url, { style, size });
+    } else {
+      await purgePublicTemplateCache(request.url);
+    }
     return Response.json({ ok: true });
   } catch (error) {
     return adminErrorResponse(error);

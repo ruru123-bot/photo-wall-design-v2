@@ -45,6 +45,13 @@ const processSteps = [
 export default function Home() {
   return (
     <main>
+      <link
+        rel="preload"
+        as="image"
+        href="/images/wedding-photo-wall-hero-optimized.webp"
+        type="image/webp"
+        fetchPriority="high"
+      />
       <header className="site-header">
         <a className="brand" href="#top" aria-label="匠心设计首页">
           <span className="brand-name">匠心设计 <small>ARTISAN DESIGN</small></span>
