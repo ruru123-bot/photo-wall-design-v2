@@ -1,5 +1,4 @@
 import HeroVideo from "./HeroVideo";
-import Link from "next/link";
 
 const templates = [
   {
@@ -105,15 +104,14 @@ export default function Home() {
                     <span className="size-selector-label">选择照片墙长度</span>
                     <div className="size-options" aria-label={`${template.title}照片墙长度`}>
                       {sizeOptions.map((option) => (
-                        <Link
+                        <a
                           className="size-option"
                           href={`/preview?style=${template.className}&size=${option.id}`}
                           key={option.id}
-                          prefetch={false}
                           aria-label={`预览${template.title}${option.label}效果`}
                         >
                           {option.label}<small>点击预览</small>
-                        </Link>
+                        </a>
                       ))}
                     </div>
                   </div>

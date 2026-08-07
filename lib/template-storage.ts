@@ -14,6 +14,9 @@ export type TemplateAsset = {
   size: TemplateSize;
   uploadedAt: string;
   url: string;
+  previewUrl: string;
+  thumbnailUrl: string;
+  adminUrl: string;
 };
 
 type CloudinaryConfig = {
@@ -128,6 +131,9 @@ export async function uploadTemplateAsset(input: {
     size: input.size,
     uploadedAt: uploaded.created_at || uploadedAt,
     url: `/api/media?key=${encodeURIComponent(uploaded.public_id || publicId)}`,
+    previewUrl: getTemplateDeliveryUrl(uploaded.public_id || publicId, 960),
+    thumbnailUrl: getTemplateDeliveryUrl(uploaded.public_id || publicId, 320),
+    adminUrl: getTemplateDeliveryUrl(uploaded.public_id || publicId, 720),
   };
 }
 
@@ -221,6 +227,9 @@ function toTemplateAsset(resource: CloudinaryResource): TemplateAsset | null {
     size: sizeValue,
     uploadedAt: resource.created_at || new Date(0).toISOString(),
     url: `/api/media?key=${encodeURIComponent(resource.public_id)}`,
+    previewUrl: getTemplateDeliveryUrl(resource.public_id, 960),
+    thumbnailUrl: getTemplateDeliveryUrl(resource.public_id, 320),
+    adminUrl: getTemplateDeliveryUrl(resource.public_id, 720),
   };
 }
 

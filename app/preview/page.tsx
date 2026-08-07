@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 const styles = {
   cute: { title: "卡通可爱风", english: "PLAYFUL WEDDING" },
@@ -24,35 +26,9 @@ type TemplateAsset = {
   title: string;
   uploadedAt: string;
   url: string;
+  previewUrl?: string;
+  thumbnailUrl?: string;
 };
-
-const templateCacheTtl = 5 * 60 * 1000;
-
-function templateCacheKey(style: StyleKey, size: SizeKey) {
-  return `wedding-templates:${style}:${size}`;
-}
-
-function readTemplateCache(style: StyleKey, size: SizeKey): TemplateAsset[] | null {
-  try {
-    const value = sessionStorage.getItem(templateCacheKey(style, size));
-    if (!value) return null;
-    const cached = JSON.parse(value) as { savedAt: number; templates: TemplateAsset[] };
-    return Date.now() - cached.savedAt < templateCacheTtl ? cached.templates : null;
-  } catch {
-    return null;
-  }
-}
-
-function writeTemplateCache(style: StyleKey, size: SizeKey, templates: TemplateAsset[]) {
-  try {
-    sessionStorage.setItem(
-      templateCacheKey(style, size),
-      JSON.stringify({ savedAt: Date.now(), templates }),
-    );
-  } catch {
-    // Storage can be unavailable in private browsing; the page still works without it.
-  }
-}
 
 function isStyleKey(value: string | null): value is StyleKey {
   return Boolean(value && value in styles);
@@ -63,67 +39,49 @@ function isSizeKey(value: string | null): value is SizeKey {
 }
 
 export default function PreviewPage() {
-  const [selection, setSelection] = useState<{ style: StyleKey; size: SizeKey }>({
-    style: "cute",
-    size: "compact",
-  });
-  const [ready, setReady] = useState(false);
+  const searchParams = useSearchParams();
+  const styleParam = searchParams.get("style");
+  const sizeParam = searchParams.get("size");
+  const selection: { style: StyleKey; size: SizeKey } = {
+    style: isStyleKey(styleParam) ? styleParam : "cute",
+    size: isSizeKey(sizeParam) ? sizeParam : "compact",
+  };
   const [templates, setTemplates] = useState<TemplateAsset[]>([]);
   const [activeTemplate, setActiveTemplate] = useState(0);
   const [loadingTemplates, setLoadingTemplates] = useState(true);
   const [mainImageLoaded, setMainImageLoaded] = useState(false);
+  const [templateError, setTemplateError] = useState("");
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const style = params.get("style");
-    const size = params.get("size");
-
-    setSelection({
-      style: isStyleKey(style) ? style : "cute",
-      size: isSizeKey(size) ? size : "compact",
-    });
-    setReady(true);
-  }, []);
-
-  useEffect(() => {
-    if (!ready) return;
     const controller = new AbortController();
-    setActiveTemplate(0);
-    setMainImageLoaded(false);
 
-    const cachedTemplates = readTemplateCache(selection.style, selection.size);
-    if (cachedTemplates) {
-      setTemplates(cachedTemplates);
-      setLoadingTemplates(false);
-    } else {
-      setTemplates([]);
-      setLoadingTemplates(true);
-    }
-
-    fetch(`/api/templates?style=${selection.style}&size=${selection.size}`, {
-      cache: "default",
+    fetch(`/api/templates?style=${selection.style}&size=${selection.size}&fresh=${Date.now()}`, {
+      cache: "no-store",
       signal: controller.signal,
     })
       .then(async (response) => {
-        const payload = await response.json() as { templates?: TemplateAsset[] };
-        const nextTemplates = response.ok ? payload.templates || [] : [];
+        const payload = await response.json() as { templates?: TemplateAsset[]; error?: string };
+        if (!response.ok) throw new Error(payload.error || "模板读取失败");
+        const nextTemplates = payload.templates || [];
         setTemplates(nextTemplates);
-        writeTemplateCache(selection.style, selection.size, nextTemplates);
       })
-      .catch(() => {
-        if (!cachedTemplates) setTemplates([]);
+      .catch((error: unknown) => {
+        if (controller.signal.aborted) return;
+        setTemplates([]);
+        setTemplateError(error instanceof Error ? error.message : "模板读取失败，请稍后重试");
       })
-      .finally(() => setLoadingTemplates(false));
+      .finally(() => {
+        if (!controller.signal.aborted) setLoadingTemplates(false);
+      });
 
     return () => controller.abort();
-  }, [ready, selection.size, selection.style]);
+  }, [selection.size, selection.style]);
 
   const currentStyle = styles[selection.style];
   const currentSize = sizes[selection.size];
   const currentTemplate = templates[activeTemplate];
 
   useEffect(() => {
-    setMainImageLoaded(false);
     if (templates.length < 2) return;
 
     const timer = window.setTimeout(() => {
@@ -132,7 +90,7 @@ export default function PreviewPage() {
         .filter((template): template is TemplateAsset => Boolean(template));
       nearby.forEach((template) => {
         const image = new Image();
-        image.src = `${template.url}&w=960`;
+        image.src = template.previewUrl || `${template.url}&w=960`;
       });
     }, 180);
 
@@ -143,7 +101,7 @@ export default function PreviewPage() {
     const template = templates[index];
     if (!template) return;
     const image = new Image();
-    image.src = `${template.url}&w=960`;
+    image.src = template.previewUrl || `${template.url}&w=960`;
   };
 
   const goBack = () => {
@@ -160,7 +118,7 @@ export default function PreviewPage() {
         <button className="preview-back" type="button" onClick={goBack} aria-label="返回模板选择">
           <span aria-hidden="true">←</span> 返回选择
         </button>
-        <a className="preview-brand" href="/#top">匠心设计 <small>ARTISAN DESIGN</small></a>
+        <Link className="preview-brand" href="/#top">匠心设计 <small>ARTISAN DESIGN</small></Link>
       </header>
 
       <section className="preview-intro">
@@ -175,6 +133,7 @@ export default function PreviewPage() {
           <span>比例效果预览</span>
         </div>
         {loadingTemplates && <p className="preview-loading-indicator">正在同步最新模板…</p>}
+        {templateError && <p className="preview-loading-indicator preview-error-indicator">{templateError}</p>}
         <div className="preview-image-stack">
           <div
             className={`wall-preview wall-preview-${selection.style}`}
@@ -194,7 +153,7 @@ export default function PreviewPage() {
             <figure className={`uploaded-wall-preview${mainImageLoaded ? " is-loaded" : ""}`}>
               <img
                 key={currentTemplate.key}
-                src={`${currentTemplate.url}&w=960`}
+                src={currentTemplate.previewUrl || `${currentTemplate.url}&w=960`}
                 alt={`${currentTemplate.title}照片墙效果`}
                 decoding="async"
                 fetchPriority="high"
@@ -223,7 +182,7 @@ export default function PreviewPage() {
                   setActiveTemplate(index);
                 }}
               >
-                <img src={`${template.url}&w=320`} alt="" loading={index < 4 ? "eager" : "lazy"} decoding="async" />
+                <img src={template.thumbnailUrl || `${template.url}&w=320`} alt="" loading={index < 2 ? "eager" : "lazy"} decoding="async" />
                 <span>{template.title}</span>
               </button>
             ))}

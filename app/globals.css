@@ -208,9 +208,10 @@ main {
   transition: opacity .25s ease;
 }
 .hero-media.is-playing .hero-video { opacity: 1; }
+.hero-media.is-playing .hero-video-fallback { animation: none; transform: scale(1.035); }
 @keyframes hero-fallback-motion {
-  from { background-position: 47% center; transform: scale(1.035); }
-  to { background-position: 53% center; transform: scale(1.075); }
+  from { transform: scale(1.035); }
+  to { transform: scale(1.075); }
 }
 .hero-wash {
   position: absolute;
@@ -379,6 +380,8 @@ main {
   gap: 6px;
   padding: 8px 6px;
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(176, 140, 87, .18);
   border: 1px solid rgba(163,133,91,.4);
   border-radius: 12px;
   background: rgba(255,253,248,.82);
@@ -523,6 +526,7 @@ main {
 }
 .preview-stage-meta { position: absolute; top: 20px; right: 22px; left: 22px; display: flex; justify-content: space-between; color: rgba(97,78,60,.58); font: 500 8px/1 Arial, sans-serif; letter-spacing: .17em; }
 .preview-loading-indicator { position: absolute; z-index: 5; top: 38px; right: 22px; margin: 0; color: rgba(97,78,60,.68); font-size: 9px; letter-spacing: .06em; }
+.preview-error-indicator { right: 22px; left: 22px; color: #8a4f43; text-align: center; }
 .preview-image-stack {
   position: relative;
   width: min(100%, 462px);
@@ -602,8 +606,7 @@ main {
 .uploaded-template-list span { display: block; overflow: hidden; margin-top: 7px; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
 
 @supports (content-visibility: auto) {
-  .template-card, .process-step { content-visibility: auto; }
-  .template-card { contain-intrinsic-size: 560px; }
+  .process-step { content-visibility: auto; }
   .process-step { contain-intrinsic-size: 126px; }
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 
 type TemplateAsset = {
   key: string;
@@ -9,6 +10,7 @@ type TemplateAsset = {
   size: string;
   uploadedAt: string;
   url: string;
+  adminUrl?: string;
 };
 
 const styleOptions = [
@@ -37,7 +39,6 @@ export default function AdminDashboard({ displayName, email }: { displayName: st
   const [filterSize, setFilterSize] = useState("all");
 
   const loadTemplates = useCallback(async () => {
-    setLoading(true);
     try {
       const response = await fetch("/api/admin/templates", { cache: "no-store" });
       const payload = await response.json() as { templates?: TemplateAsset[]; error?: string };
@@ -51,7 +52,8 @@ export default function AdminDashboard({ displayName, email }: { displayName: st
   }, []);
 
   useEffect(() => {
-    void loadTemplates();
+    const frame = window.requestAnimationFrame(() => void loadTemplates());
+    return () => window.cancelAnimationFrame(frame);
   }, [loadTemplates]);
 
   const visibleTemplates = useMemo(() => templates.filter((item) => (
@@ -68,11 +70,16 @@ export default function AdminDashboard({ displayName, email }: { displayName: st
 
     try {
       const response = await fetch("/api/admin/templates", { method: "POST", body: data });
-      const payload = await response.json() as { error?: string };
+      const payload = await response.json() as { template?: TemplateAsset; error?: string };
       if (!response.ok) throw new Error(payload.error || "上传失败。");
       form.reset();
+      if (payload.template) {
+        setTemplates((current) => [
+          payload.template!,
+          ...current.filter((item) => item.key !== payload.template!.key),
+        ]);
+      }
       setMessage("上传成功，图片已经进入对应尺寸的预览页面。");
-      await loadTemplates();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "上传失败。");
     } finally {
@@ -99,10 +106,10 @@ export default function AdminDashboard({ displayName, email }: { displayName: st
     <main className="admin-page">
       <header className="admin-header">
         <div>
-          <a className="admin-brand" href="/">匠心设计 <small>ARTISAN DESIGN</small></a>
+          <Link className="admin-brand" href="/">匠心设计 <small>ARTISAN DESIGN</small></Link>
           <p>模板管理后台</p>
         </div>
-        <a className="admin-home-link" href="/#templates">查看网站</a>
+        <Link className="admin-home-link" href="/#templates">查看网站</Link>
       </header>
 
       <section className="admin-hero">
@@ -171,7 +178,7 @@ export default function AdminDashboard({ displayName, email }: { displayName: st
           <div className="admin-template-grid">
             {visibleTemplates.map((item) => (
               <article className="admin-template-card" key={item.key}>
-                <img src={`${item.url}&w=720`} alt={item.title} loading="lazy" decoding="async" />
+                <img src={item.adminUrl || `${item.url}&w=720`} alt={item.title} loading="lazy" decoding="async" />
                 <div>
                   <h3>{item.title}</h3>
                   <p>{styleLabels[item.style]} · {sizeLabels[item.size]}</p>

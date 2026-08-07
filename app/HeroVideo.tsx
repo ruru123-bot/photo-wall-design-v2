@@ -22,28 +22,41 @@ export default function HeroVideo() {
     video.setAttribute("muted", "");
 
     let attempts = 0;
+    let retryTimer: number | undefined;
+    const scheduleRetry = () => {
+      if (retryTimer !== undefined || attempts >= 8) return;
+      retryTimer = window.setTimeout(() => {
+        retryTimer = undefined;
+        tryPlay();
+      }, 700);
+    };
     const tryPlay = () => {
-      if (!video.paused || attempts >= 20) return;
+      if (!video.paused || attempts >= 8) return;
       attempts += 1;
-      void video.play().catch(() => undefined);
+      void video.play().catch(scheduleRetry);
     };
     const resumeWhenVisible = () => {
       if (!document.hidden) tryPlay();
     };
+    const stopRetrying = () => {
+      if (retryTimer !== undefined) window.clearTimeout(retryTimer);
+      retryTimer = undefined;
+    };
 
     tryPlay();
-    const retryTimer = window.setInterval(tryPlay, 500);
     window.addEventListener("pageshow", tryPlay);
     document.addEventListener("visibilitychange", resumeWhenVisible);
     document.addEventListener("WeixinJSBridgeReady", tryPlay);
     video.addEventListener("canplay", tryPlay);
+    video.addEventListener("playing", stopRetrying);
 
     return () => {
-      window.clearInterval(retryTimer);
+      stopRetrying();
       window.removeEventListener("pageshow", tryPlay);
       document.removeEventListener("visibilitychange", resumeWhenVisible);
       document.removeEventListener("WeixinJSBridgeReady", tryPlay);
       video.removeEventListener("canplay", tryPlay);
+      video.removeEventListener("playing", stopRetrying);
     };
   }, []);
 
