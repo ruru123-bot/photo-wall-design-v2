@@ -32,6 +32,14 @@ interface ExecutionContext {
 
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    // Vinext loads route handlers from separate server chunks. Bridge the
+    // request-scoped Worker bindings so those chunks can reliably read the
+    // production variables and secrets configured in Cloudflare.
+    const runtime = globalThis as typeof globalThis & {
+      __PHOTO_WALL_ENV__?: Env;
+    };
+    runtime.__PHOTO_WALL_ENV__ = env;
+
     const url = new URL(request.url);
 
     if (isAdminRequest(url.pathname)) {

@@ -25,6 +25,12 @@ type CloudinaryConfig = {
   apiSecret: string;
 };
 
+type CloudinaryRuntimeEnv = {
+  CLOUDINARY_CLOUD_NAME?: string;
+  CLOUDINARY_API_KEY?: string;
+  CLOUDINARY_API_SECRET?: string;
+};
+
 type CloudinaryResource = {
   public_id: string;
   created_at?: string;
@@ -161,11 +167,12 @@ export function getTemplateDeliveryUrl(publicId: string, width: number | null) {
 }
 
 function getCloudinaryConfig(): CloudinaryConfig {
-  const runtime = env as unknown as {
-    CLOUDINARY_CLOUD_NAME?: string;
-    CLOUDINARY_API_KEY?: string;
-    CLOUDINARY_API_SECRET?: string;
-  };
+  const bridgedRuntime = (
+    globalThis as typeof globalThis & {
+      __PHOTO_WALL_ENV__?: CloudinaryRuntimeEnv;
+    }
+  ).__PHOTO_WALL_ENV__;
+  const runtime = bridgedRuntime || (env as unknown as CloudinaryRuntimeEnv);
   const cloudName = runtime.CLOUDINARY_CLOUD_NAME?.trim() || "";
   const apiKey = runtime.CLOUDINARY_API_KEY?.trim() || "";
   const apiSecret = runtime.CLOUDINARY_API_SECRET || "";

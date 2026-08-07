@@ -77,11 +77,13 @@ test("keeps the repository configured for the current Workers deployment", async
   assert.match(worker, /ADMIN_USERNAME/);
   assert.match(worker, /x-photo-wall-admin/);
   assert.match(worker, /CLOUDINARY_CLOUD_NAME/);
+  assert.match(worker, /__PHOTO_WALL_ENV__/);
   assert.doesNotMatch(worker, /R2Bucket|MEDIA:/);
   assert.match(storage, /api\.cloudinary\.com/);
   assert.match(storage, /res\.cloudinary\.com/);
   assert.match(storage, /q_auto:eco/);
   assert.match(storage, /c_limit,w_/);
+  assert.match(storage, /__PHOTO_WALL_ENV__/);
   assert.match(wrangler, /"name": "photo-wall-design"/);
   assert.doesNotMatch(wrangler, /r2_buckets|photo-wall-design-media/);
   assert.match(hosting, /"r2": null/);
