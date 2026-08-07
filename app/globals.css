@@ -1,0 +1,667 @@
+@import "tailwindcss";
+
+:root {
+  --cream: #f6f1e8;
+  --paper: #fbf8f2;
+  --ink: #302925;
+  --muted: #796c62;
+  --gold: #b69562;
+  --gold-light: #dec9a4;
+  --champagne: #c7ab7d;
+  --bronze: #806d50;
+  --rose: #cbbba4;
+  --line: rgba(126, 103, 76, .22);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  background: #eeeae2;
+  color: var(--ink);
+  font-family: "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+
+main {
+  position: relative;
+  width: min(100%, 540px);
+  min-height: 100vh;
+  margin-inline: auto;
+  overflow: hidden;
+  background: var(--paper);
+  box-shadow: 0 0 70px rgba(50, 38, 29, .18);
+}
+
+.page-shell {
+  width: calc(100% - 40px);
+  margin-inline: auto;
+}
+
+.site-header {
+  position: absolute;
+  z-index: 50;
+  top: 28px;
+  left: 32px;
+  display: flex;
+  width: calc(100% - 64px);
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.brand {
+  display: inline-flex;
+  width: max-content;
+  align-items: center;
+  gap: 9px;
+}
+
+.brand-mark {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid var(--gold);
+  border-radius: 50% 50% 47% 53%;
+  color: var(--gold);
+  font: italic 19px/1 Georgia, serif;
+}
+
+.brand-name {
+  display: flex;
+  flex-direction: column;
+  color: #826d4d;
+  font: 500 18px/1.05 "Songti SC", "STSong", serif;
+  letter-spacing: .12em;
+}
+
+.brand-name small {
+  margin-top: 4px;
+  color: #aa8f64;
+  font: 500 6px/1 Arial, sans-serif;
+  letter-spacing: .16em;
+}
+
+.header-actions { display: flex; align-items: center; gap: 7px; }
+
+.mobile-menu { position: relative; }
+.mobile-menu summary {
+  position: relative;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  list-style: none;
+  place-items: center;
+  border: 1px solid rgba(182, 149, 98, .48);
+  border-radius: 50%;
+  background: rgba(255, 253, 248, .58);
+}
+.mobile-menu summary::-webkit-details-marker { display: none; }
+.mobile-menu summary span {
+  position: absolute;
+  width: 18px;
+  height: 1px;
+  background: #8b714c;
+  transition: transform .2s ease, top .2s ease;
+}
+.mobile-menu summary span:first-child { top: 16px; }
+.mobile-menu summary span:last-child { top: 23px; }
+.mobile-menu[open] summary span:first-child { top: 20px; transform: rotate(45deg); }
+.mobile-menu[open] summary span:last-child { top: 20px; transform: rotate(-45deg); }
+.mobile-menu nav {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  display: flex;
+  width: 218px;
+  flex-direction: column;
+  padding: 10px 18px;
+  border: 1px solid rgba(174, 145, 106, .27);
+  background: rgba(251, 247, 239, .98);
+  box-shadow: 0 18px 50px rgba(48, 33, 24, .2);
+}
+.mobile-menu nav a {
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  gap: 18px;
+  border-bottom: 1px solid rgba(126, 103, 76, .16);
+  color: #463a33;
+  font: 400 15px/1 "Songti SC", serif;
+  letter-spacing: .08em;
+}
+.mobile-menu nav a:last-child { border-bottom: 0; }
+.mobile-menu nav small { color: var(--gold); font: 500 8px/1 Arial, sans-serif; letter-spacing: .12em; }
+
+.button {
+  display: inline-flex;
+  min-height: 56px;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 0 22px;
+  border: 1px solid transparent;
+  font-size: 14px;
+  letter-spacing: .1em;
+  transition: transform .2s ease, background .2s ease;
+}
+.button:active { transform: scale(.985); }
+.button-primary { background: linear-gradient(135deg, #a88755, #d0b181); color: #fffdf8; box-shadow: 0 14px 36px rgba(130, 102, 62, .23); }
+.button-ghost { border-color: rgba(102, 78, 60, .4); background: rgba(255,250,244,.28); color: #493a32; }
+.button-large { width: 100%; min-height: 58px; }
+
+.hero {
+  position: relative;
+  height: 100svh;
+  min-height: 760px;
+  max-height: 920px;
+  overflow: hidden;
+  padding: 12px;
+  background: #f7f4ee;
+}
+.hero::before {
+  position: absolute;
+  z-index: 2;
+  inset: 12px;
+  border: 1px solid rgba(214, 190, 150, .74);
+  border-radius: 30px;
+  box-shadow: inset 0 0 0 5px rgba(255,255,255,.18), 0 22px 55px rgba(91, 73, 49, .13);
+  content: "";
+  pointer-events: none;
+}
+.hero-media {
+  position: absolute;
+  z-index: 0;
+  inset: 12px;
+  overflow: hidden;
+  border-radius: 30px;
+  background: #e7dfd2;
+}
+.hero-video-fallback,
+.hero-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.hero-video-fallback {
+  background: #e7dfd2 url("/images/wedding-photo-wall-hero-optimized.webp") center / cover no-repeat;
+  animation: hero-fallback-motion 7s ease-in-out infinite alternate;
+  transform: scale(1.035);
+}
+.hero-video {
+  object-fit: cover;
+  object-position: center center;
+  opacity: 0;
+  transition: opacity .25s ease;
+}
+.hero-media.is-playing .hero-video { opacity: 1; }
+@keyframes hero-fallback-motion {
+  from { background-position: 47% center; transform: scale(1.035); }
+  to { background-position: 53% center; transform: scale(1.075); }
+}
+.hero-wash {
+  position: absolute;
+  z-index: 1;
+  inset: 12px;
+  border-radius: 30px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.11) 0%, rgba(255,255,255,.02) 44%, rgba(245,239,228,.42) 61%, rgba(246,241,232,.94) 82%, #f6f1e8 100%),
+    linear-gradient(90deg, rgba(255,255,255,.1), transparent);
+}
+.hero-content {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  width: calc(100% - 56px);
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-top: 100px;
+  padding-bottom: 70px;
+  text-align: center;
+}
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: #846952;
+  font: 500 9px/1 Arial, sans-serif;
+  letter-spacing: .22em;
+}
+.eyebrow > span { width: 30px; height: 1px; background: var(--gold); }
+.eyebrow-dark { color: #92775e; }
+.hero h1, .section-heading h2 {
+  font-family: "Songti SC", "STSong", "Noto Serif SC", serif;
+  font-weight: 400;
+  letter-spacing: .06em;
+}
+.hero h1 {
+  position: relative;
+  margin: 0;
+  padding-top: 27px;
+  color: #433b31;
+  font-size: clamp(38px, 10.6vw, 50px);
+  line-height: 1.2;
+  letter-spacing: .055em;
+}
+.hero h1::before {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 64px;
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  content: "";
+}
+.hero h1::after {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  transform: translateX(-50%) rotate(45deg);
+  border: 1px solid var(--gold);
+  background: #f6f1e8;
+  content: "";
+}
+.hero-actions { width: 100%; margin-top: 28px; }
+.hero-actions .button { width: min(100%, 320px); min-height: 58px; border: 1px solid rgba(255,255,255,.58); border-radius: 29px; font-size: 13px; gap: 24px; }
+
+.template-section {
+  padding: 88px 0 92px;
+  background:
+    radial-gradient(circle at 5% 4%, rgba(195,169,133,.16), transparent 20%),
+    linear-gradient(180deg, #fbf8f2, #f5efe6);
+}
+.heading-row {
+  display: block;
+  padding-bottom: 29px;
+  border-bottom: 1px solid var(--line);
+}
+.section-heading h2 { margin: 18px 0 0; font-size: clamp(36px, 9.5vw, 45px); line-height: 1.25; }
+.heading-row > p { margin: 18px 0 0; color: var(--muted); font-size: 13px; line-height: 1.9; letter-spacing: .055em; }
+.template-grid { display: grid; grid-template-columns: 1fr; gap: 64px; padding-top: 28px; }
+.template-card { min-width: 0; }
+.template-card-heading { padding: 0 4px 18px; }
+.template-card-heading > span { color: #a0845c; font: 500 9px/1 Arial, sans-serif; letter-spacing: .2em; }
+.template-card-heading h3 { margin: 9px 0 0; font: 400 26px/1.35 "Songti SC", "STSong", serif; letter-spacing: .05em; }
+.template-card-heading p { max-width: 390px; margin: 9px 0 0; color: var(--muted); font-size: 12px; line-height: 1.75; letter-spacing: .035em; }
+.template-preview {
+  position: relative;
+  height: clamp(455px, 125vw, 585px);
+  overflow: hidden;
+  border: 1px solid rgba(142,115,84,.2);
+  background: #ded2c5;
+}
+.template-preview::after { position: absolute; inset: 0; border: 1px solid rgba(255,255,255,.45); content: ""; pointer-events: none; }
+.preview-label { position: absolute; z-index: 4; right: 17px; bottom: 15px; color: rgba(255,255,255,.78); font: 500 7px/1 Arial; letter-spacing: .2em; }
+.poster-canvas { position: absolute; overflow: hidden; background: #f9f5ee; box-shadow: 0 26px 55px rgba(45,32,22,.22); }
+.poster-photo { position: absolute; background: url("/images/wedding-photo-wall-hero-optimized.webp") 70% center / auto 100% no-repeat; }
+.poster-caption { position: absolute; z-index: 3; font-family: "Songti SC", serif; letter-spacing: .13em; }
+.poster-decor { position: absolute; z-index: 2; }
+
+.preview-cute { background: #d8cbbb; }
+.preview-cute .poster-canvas { inset: 50px 31px 38px; border-radius: 180px 180px 18px 18px; background: #fff5ef; }
+.preview-cute .photo-main { inset: 35px 29px 103px; border-radius: 135px 135px 24px 24px; background-size: auto 115%; background-position: 72% center; }
+.preview-cute .photo-small { right: 23px; bottom: 27px; width: 98px; height: 112px; transform: rotate(4deg); border: 7px solid #fff; border-bottom-width: 24px; background-position: 84% center; box-shadow: 0 8px 20px rgba(90,49,54,.14); }
+.preview-cute .poster-caption { bottom: 55px; left: 24px; color: #917451; font-size: 13px; }
+.preview-cute .decor-one { bottom: 82px; left: 25px; width: 41px; height: 24px; border: 1px solid #b99d75; border-radius: 50%; transform: rotate(-21deg); }
+.preview-cute .decor-two { top: 20px; right: 37px; width: 8px; height: 8px; border-radius: 50%; background: #a98a5d; box-shadow: 16px 8px 0 #e5c998, -9px 17px 0 #eee3d4; }
+
+.preview-gradient { background: linear-gradient(145deg, #aaa8a1, #d9cfc0 53%, #cfbd96); }
+.preview-gradient .poster-canvas { inset: 35px 25px 32px; background: linear-gradient(145deg, #aaa69f, #e4d8c7 54%, #c9b48b); }
+.preview-gradient .photo-main { top: 52px; right: 25px; bottom: 69px; left: 46px; background-size: auto 116%; background-position: 69% center; mix-blend-mode: luminosity; opacity: .84; }
+.preview-gradient .photo-small { top: 20px; right: 20px; width: 96px; height: 134px; border: 1px solid rgba(255,255,255,.8); background-size: auto 110%; background-position: 84% center; }
+.preview-gradient .poster-caption { right: 22px; bottom: 27px; color: rgba(255,255,255,.94); font-size: 12px; writing-mode: vertical-rl; }
+.preview-gradient .decor-one { top: -29px; left: -34px; width: 150px; height: 150px; border: 1px solid rgba(255,255,255,.42); border-radius: 50%; }
+.preview-gradient .decor-two { right: -43px; bottom: -45px; width: 135px; height: 135px; border: 1px solid rgba(255,255,255,.38); transform: rotate(45deg); }
+
+.preview-korean { background: #d8cec0; }
+.preview-korean .poster-canvas { inset: 29px 30px 31px; background: #f7f3eb; }
+.preview-korean .photo-main { right: -70px; bottom: -18px; width: 127%; height: 91%; background-size: auto 104%; background-position: 82% center; mix-blend-mode: multiply; }
+.preview-korean .photo-small { display: none; }
+.preview-korean .poster-caption { top: 43px; left: 23px; width: 18px; color: #6a5b50; font-size: 13px; line-height: 1.6; writing-mode: vertical-rl; }
+.preview-korean .decor-one { top: 35px; right: 22px; width: 20px; height: 1px; background: #a88f70; }
+.preview-korean .decor-two { top: 31px; right: 31px; width: 1px; height: 20px; background: #a88f70; }
+
+.preview-traditional { background: #8a755f; }
+.preview-traditional .poster-canvas { inset: 33px 24px 29px; border: 1px solid #d5ad70; background: #665443; }
+.preview-traditional .poster-canvas::before { position: absolute; inset: 11px; border: 1px solid rgba(219,181,120,.5); content: ""; }
+.preview-traditional .photo-main { inset: 45px 37px 124px; border: 6px solid #e6d0aa; background-size: auto 113%; background-position: 73% center; filter: sepia(.18) saturate(.9); }
+.preview-traditional .photo-small { right: 25px; bottom: 31px; width: 112px; height: 108px; border: 5px solid #ead8b9; background-position: 85% center; }
+.preview-traditional .poster-caption { bottom: 66px; left: 27px; width: 1em; color: #e9ce9d; font-size: 17px; line-height: 1.1; writing-mode: vertical-rl; }
+.preview-traditional .decor-one, .preview-traditional .decor-two { width: 31px; height: 31px; border: 1px solid rgba(225,190,133,.7); transform: rotate(45deg); }
+.preview-traditional .decor-one { top: 25px; left: 23px; }
+.preview-traditional .decor-two { right: 23px; bottom: 24px; }
+
+.size-selector {
+  position: absolute;
+  z-index: 6;
+  top: 50%;
+  left: 50%;
+  width: min(calc(100% - 48px), 360px);
+  padding: 21px 18px 18px;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(255,255,255,.62);
+  border-radius: 22px;
+  background: rgba(248,243,234,.96);
+  box-shadow: 0 20px 55px rgba(65,49,34,.2);
+}
+.size-selector-label { display: block; color: #76614b; font: 400 15px/1.2 "Songti SC", serif; text-align: center; letter-spacing: .12em; }
+.size-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 16px;
+}
+.size-option {
+  display: flex;
+  min-width: 0;
+  min-height: 56px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 6px;
+  cursor: pointer;
+  border: 1px solid rgba(163,133,91,.4);
+  border-radius: 12px;
+  background: rgba(255,253,248,.82);
+  color: #6d5c4c;
+  font: 500 12px/1 "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  letter-spacing: .035em;
+  transition: transform .2s ease, color .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+.size-option small { color: #aa8d65; font-size: 8px; font-weight: 500; letter-spacing: .13em; }
+.size-option:active {
+  transform: scale(.98);
+  border-color: #b08c57;
+  background: linear-gradient(135deg, #a88755, #d0b181);
+  color: #fffdf8;
+  box-shadow: 0 9px 24px rgba(142,111,67,.2);
+}
+.size-option:active small { color: #fff8ec; }
+.size-option:focus-visible { outline: 2px solid #806d50; outline-offset: 3px; }
+.more-templates { margin-top: 56px; padding: 23px; border: 1px solid var(--line); background: rgba(255,252,246,.6); }
+.more-templates p { margin: 0; color: #73655b; font-size: 12px; line-height: 1.85; letter-spacing: .055em; }
+.more-templates p span { margin-right: 7px; color: var(--gold); }
+.text-link { display: flex; min-height: 48px; align-items: flex-end; justify-content: space-between; margin-top: 13px; padding-bottom: 8px; border-bottom: 1px solid #9f7e5d; color: #634d3f; font-size: 13px; letter-spacing: .1em; }
+
+.process-section {
+  position: relative;
+  overflow: hidden;
+  padding: 90px 0 104px;
+  background:
+    radial-gradient(circle at 85% 8%, rgba(218,195,156,.34), transparent 28%),
+    linear-gradient(180deg, #e9dfd1, #f7f3ec);
+  color: var(--ink);
+}
+.process-section::before { position: absolute; inset: 12px; border: 1px solid rgba(182,149,98,.28); content: ""; pointer-events: none; }
+.process-glow { position: absolute; top: -110px; left: 50%; width: 500px; height: 330px; transform: translateX(-50%); border-radius: 50%; background: radial-gradient(circle, rgba(208,178,130,.28), rgba(208,178,130,0) 70%); }
+.process-heading { position: relative; text-align: left; }
+.process-heading .eyebrow { color: #9d7e50; }
+.process-heading h2 { margin-top: 20px; color: #443a30; font-size: 43px; }
+.process-heading > p { margin: 15px 0 0; color: #7c6d60; font-size: 12px; letter-spacing: .08em; }
+.process-list { position: relative; display: grid; grid-template-columns: 1fr; gap: 0; margin-top: 58px; }
+.process-list::before { position: absolute; top: 29px; bottom: 34px; left: 29px; width: 1px; background: linear-gradient(rgba(182,149,98,.72), rgba(182,149,98,.14)); content: ""; }
+.process-step {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 59px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 20px;
+  min-height: 126px;
+  padding-bottom: 33px;
+  text-align: left;
+}
+.process-step:last-child { min-height: 59px; padding-bottom: 0; }
+.step-number {
+  grid-row: 1 / span 2;
+  display: grid;
+  width: 59px;
+  height: 59px;
+  place-items: center;
+  border: 1px solid rgba(215,189,142,.75);
+  border-radius: 50%;
+  background: #f7f2e9;
+  color: #917348;
+  font: italic 15px/1 Georgia, serif;
+  box-shadow: 0 0 0 7px #e9dfd1;
+}
+.step-icon { display: none; }
+.process-step h3 { grid-column: 2; margin: 4px 0 0; color: #453b32; font: 400 20px/1.4 "Songti SC", serif; letter-spacing: .07em; }
+.process-step p { grid-column: 2; max-width: 295px; margin: 8px 0 0; color: #7c6d60; font-size: 12px; line-height: 1.8; letter-spacing: .04em; }
+
+.site-footer { padding: 62px 0; background: #f2eadf; }
+.footer-inner { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 19px; }
+.brand-footer .brand-mark { width: 38px; height: 38px; }
+.footer-inner > p { margin: 0; color: #76685d; font-size: 12px; letter-spacing: .07em; }
+.footer-contact { display: flex; flex-direction: column; gap: 10px; color: #5e4d43; font-size: 13px; letter-spacing: .065em; }
+.footer-contact i { display: none; }
+.footer-admin-link { min-height: 44px; padding-top: 12px; border-bottom: 1px solid #a98a5e; color: #806744; font-size: 12px; letter-spacing: .08em; }
+.copyright { padding-top: 19px; border-top: 1px solid var(--line); width: 100%; }
+.back-top { position: absolute; top: 0; right: 0; display: grid; width: 49px; height: 49px; place-items: center; border: 1px solid #b9a488; border-radius: 50%; color: #725b49; }
+
+.preview-page {
+  --preview-wall-ratio: 1.35;
+  min-height: 100svh;
+  padding-bottom: 52px;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(218,198,166,.28), transparent 28%),
+    linear-gradient(180deg, #fbf8f2, #efe7dc);
+}
+.preview-page[data-size="compact"] { --preview-wall-ratio: 1.35; }
+.preview-page[data-size="medium"] { --preview-wall-ratio: 1.78; }
+.preview-page[data-size="large"] { --preview-wall-ratio: 2.35; }
+.preview-page[data-size="panorama"] { --preview-wall-ratio: 3.15; }
+.preview-header {
+  display: flex;
+  min-height: 82px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(251,248,242,.97);
+}
+.preview-back {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  cursor: pointer;
+  border: 1px solid rgba(157,126,85,.3);
+  border-radius: 24px;
+  background: rgba(255,253,248,.68);
+  color: #665442;
+  font-size: 12px;
+  letter-spacing: .06em;
+}
+.preview-back span { color: #aa8552; font-size: 18px; }
+.preview-brand { display: flex; flex-direction: column; color: #826d4d; font: 500 15px/1.05 "Songti SC", serif; text-align: right; letter-spacing: .12em; }
+.preview-brand small { margin-top: 4px; color: #aa8f64; font: 500 5px/1 Arial, sans-serif; letter-spacing: .14em; }
+.preview-intro { padding: 54px 20px 28px; text-align: center; }
+.preview-intro > p { margin: 0; color: #a0845c; font: 500 8px/1 Arial, sans-serif; letter-spacing: .23em; }
+.preview-intro h1 { margin: 13px 0 0; color: #44392f; font: 400 clamp(31px, 8.8vw, 43px)/1.25 "Songti SC", serif; letter-spacing: .06em; }
+.preview-size-title { display: flex; align-items: center; justify-content: center; gap: 13px; margin-top: 17px; color: #806949; font-size: 13px; letter-spacing: .11em; }
+.preview-size-title span { width: 28px; height: 1px; background: linear-gradient(90deg, transparent, #b69562); }
+.preview-size-title span:last-child { background: linear-gradient(90deg, #b69562, transparent); }
+.preview-stage {
+  position: relative;
+  display: flex;
+  min-height: 470px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 16px;
+  padding: 58px 14px 43px;
+  overflow: hidden;
+  border: 1px solid rgba(166,136,96,.26);
+  border-radius: 28px;
+  background:
+    linear-gradient(rgba(255,255,255,.2) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.2) 1px, transparent 1px),
+    linear-gradient(145deg, #d7cabb, #ede5da);
+  background-size: 28px 28px, 28px 28px, auto;
+  box-shadow: inset 0 0 60px rgba(255,255,255,.25);
+}
+.preview-stage-meta { position: absolute; top: 20px; right: 22px; left: 22px; display: flex; justify-content: space-between; color: rgba(97,78,60,.58); font: 500 8px/1 Arial, sans-serif; letter-spacing: .17em; }
+.preview-loading-indicator { position: absolute; z-index: 5; top: 38px; right: 22px; margin: 0; color: rgba(97,78,60,.68); font-size: 9px; letter-spacing: .06em; }
+.preview-image-stack {
+  position: relative;
+  width: min(100%, 462px);
+  aspect-ratio: var(--preview-wall-ratio);
+}
+.preview-image-stack > .wall-preview,
+.preview-image-stack > .uploaded-wall-preview { position: absolute; inset: 0; width: 100%; height: 100%; }
+.wall-preview {
+  position: relative;
+  width: min(100%, 462px);
+  aspect-ratio: var(--preview-wall-ratio);
+  overflow: hidden;
+  border: 1px solid rgba(166,132,87,.38);
+  background: #f8f2e9;
+  box-shadow: 0 22px 48px rgba(72,55,39,.25), inset 0 0 0 5px rgba(255,255,255,.24);
+  transition: aspect-ratio .35s ease;
+}
+.wall-photo { position: absolute; border: 4px solid rgba(255,253,247,.88); background: url("/images/wedding-photo-wall-hero-optimized.webp") center / cover no-repeat; box-shadow: 0 8px 20px rgba(55,40,28,.17); }
+.wall-photo-one { top: 16%; left: 7%; width: 34%; height: 67%; background-position: 68% center; }
+.wall-photo-two { top: 9%; left: 45%; width: 20%; height: 38%; background-position: 82% center; }
+.wall-photo-three { right: 8%; bottom: 13%; width: 27%; height: 43%; background-position: 76% center; }
+.wall-photo-four { bottom: 9%; left: 45%; width: 15%; height: 30%; background-position: 61% center; }
+.wall-copy { position: absolute; z-index: 3; top: 12%; right: 8%; display: flex; flex-direction: column; color: #725e48; text-align: right; }
+.wall-copy small { font: 500 clamp(4px, 1.3vw, 7px)/1 Arial, sans-serif; letter-spacing: .16em; }
+.wall-copy strong { margin-top: 5px; font: 400 clamp(8px, 2.5vw, 15px)/1.1 "Songti SC", serif; letter-spacing: .1em; }
+.wall-ornament { position: absolute; border: 1px solid rgba(177,143,94,.5); }
+.wall-ornament-one { top: -16%; left: -5%; width: 35%; aspect-ratio: 1; border-radius: 50%; }
+.wall-ornament-two { right: -8%; bottom: -31%; width: 37%; aspect-ratio: 1; transform: rotate(45deg); }
+.wall-preview-cute { border-radius: 42% 42% 14px 14px; background: #f7ede4; }
+.wall-preview-cute .wall-photo-one { border-radius: 48% 48% 18px 18px; }
+.wall-preview-cute .wall-photo-three { transform: rotate(4deg); border-bottom-width: 11px; }
+.wall-preview-gradient { background: linear-gradient(140deg, #a7a49f, #ddd2c3 54%, #c5af86); }
+.wall-preview-gradient .wall-photo-one { width: 46%; filter: grayscale(.35); opacity: .85; }
+.wall-preview-gradient .wall-photo-two { transform: rotate(3deg); }
+.wall-preview-korean { background: #f5f0e7; }
+.wall-preview-korean .wall-photo-one { top: 4%; right: 4%; bottom: 4%; left: auto; width: 48%; height: auto; border: 0; background-position: 78% center; mix-blend-mode: multiply; box-shadow: none; }
+.wall-preview-korean .wall-photo-two, .wall-preview-korean .wall-photo-three, .wall-preview-korean .wall-photo-four { display: none; }
+.wall-preview-korean .wall-copy { top: 22%; right: auto; left: 10%; text-align: left; }
+.wall-preview-traditional { border-color: #d1aa6c; background: #6e5b49; box-shadow: 0 22px 48px rgba(58,44,31,.3), inset 0 0 0 8px rgba(218,183,126,.25); }
+.wall-preview-traditional::before { position: absolute; inset: 9px; border: 1px solid rgba(230,201,151,.48); content: ""; }
+.wall-preview-traditional .wall-photo { border-color: #ead8b9; }
+.wall-preview-traditional .wall-copy { color: #ead2a7; }
+.wall-preview-traditional .wall-ornament { border-color: rgba(231,197,140,.58); }
+.uploaded-wall-preview {
+  position: relative;
+  display: grid;
+  width: min(100%, 462px);
+  margin: 0;
+  overflow: hidden;
+  place-items: center;
+  aspect-ratio: var(--preview-wall-ratio);
+  border: 1px solid rgba(166,132,87,.38);
+  background: #f8f2e9;
+  box-shadow: 0 22px 48px rgba(72,55,39,.25);
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+.uploaded-wall-preview.is-loaded { opacity: 1; }
+.uploaded-wall-preview img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.uploaded-wall-preview figcaption { position: absolute; right: 9px; bottom: 8px; left: 9px; padding: 7px 10px; background: rgba(49,40,32,.78); color: #fffdf8; font-size: 10px; text-align: center; letter-spacing: .06em; }
+.preview-scale-line { display: flex; width: min(88%, 462px); align-items: center; gap: 10px; margin-top: 24px; color: #765f45; font-size: 10px; letter-spacing: .1em; }
+.preview-scale-line i { flex: 1; height: 1px; background: rgba(139,109,70,.45); }
+.preview-scale-line span { white-space: nowrap; }
+.preview-footer { padding: 32px 24px 0; text-align: center; }
+.preview-footer p { margin: 0; color: #56473b; font: 400 17px/1.4 "Songti SC", serif; letter-spacing: .08em; }
+.preview-footer > span { display: block; margin-top: 9px; color: #857568; font-size: 11px; line-height: 1.75; letter-spacing: .04em; }
+.preview-return-button { width: 100%; min-height: 56px; margin-top: 24px; cursor: pointer; border: 1px solid rgba(255,255,255,.55); border-radius: 28px; background: linear-gradient(135deg, #a88755, #d0b181); color: #fffdf8; font-size: 13px; letter-spacing: .1em; box-shadow: 0 13px 30px rgba(132,101,59,.2); }
+.preview-back:focus-visible, .preview-return-button:focus-visible { outline: 2px solid #806d50; outline-offset: 3px; }
+.uploaded-template-picker { margin: 22px 16px 0; padding: 20px; border: 1px solid var(--line); border-radius: 22px; background: rgba(251,248,242,.76); }
+.uploaded-template-heading { display: flex; align-items: center; justify-content: space-between; color: #5e4e40; font: 400 16px/1.3 "Songti SC", serif; letter-spacing: .06em; }
+.uploaded-template-heading small { color: #9d825f; font: 500 9px/1 Arial, sans-serif; letter-spacing: .12em; }
+.uploaded-template-list { display: flex; gap: 10px; margin-top: 14px; padding-bottom: 4px; overflow-x: auto; scrollbar-width: none; }
+.uploaded-template-list::-webkit-scrollbar { display: none; }
+.uploaded-template-list button { flex: 0 0 116px; padding: 5px 5px 9px; cursor: pointer; border: 1px solid rgba(158,129,90,.25); border-radius: 12px; background: #fffdf8; color: #665343; }
+.uploaded-template-list button[aria-pressed="true"] { border-color: #a78350; box-shadow: 0 8px 20px rgba(129,99,60,.16); }
+.uploaded-template-list img { display: block; width: 100%; height: 76px; border-radius: 8px; object-fit: cover; }
+.uploaded-template-list span { display: block; overflow: hidden; margin-top: 7px; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+
+@supports (content-visibility: auto) {
+  .template-card, .process-step { content-visibility: auto; }
+  .template-card { contain-intrinsic-size: 560px; }
+  .process-step { contain-intrinsic-size: 126px; }
+}
+
+.admin-page { min-height: 100svh; padding-bottom: 64px; background: linear-gradient(180deg, #f8f4ed, #eee5d9); }
+.admin-header { position: sticky; z-index: 30; top: 0; display: flex; min-height: 76px; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--line); background: rgba(250,247,241,.9); backdrop-filter: blur(16px); }
+.admin-brand { display: flex; flex-direction: column; color: #826d4d; font: 500 17px/1.05 "Songti SC", serif; letter-spacing: .12em; }
+.admin-brand small { margin-top: 4px; color: #aa8f64; font: 500 6px/1 Arial, sans-serif; letter-spacing: .15em; }
+.admin-header > div > p { margin: 8px 0 0; color: #796a5d; font-size: 10px; letter-spacing: .1em; }
+.admin-home-link { display: grid; min-height: 44px; place-items: center; padding: 0 15px; border: 1px solid rgba(157,126,85,.32); border-radius: 23px; color: #745f48; font-size: 11px; letter-spacing: .07em; }
+.admin-hero { padding: 58px 22px 37px; text-align: center; }
+.admin-hero > p { margin: 0; color: #a0845c; font: 500 8px/1 Arial, sans-serif; letter-spacing: .22em; }
+.admin-hero h1 { margin: 14px 0 0; color: #44392f; font: 400 clamp(34px, 9.2vw, 45px)/1.25 "Songti SC", serif; letter-spacing: .06em; }
+.admin-hero > span { display: block; margin-top: 14px; color: #857568; font-size: 10px; letter-spacing: .04em; }
+.admin-panel { margin: 0 16px 22px; padding: 22px 18px; border: 1px solid rgba(160,130,90,.23); border-radius: 24px; background: rgba(255,253,248,.8); box-shadow: 0 18px 40px rgba(82,61,42,.08); }
+.admin-panel-heading { display: flex; align-items: flex-start; gap: 14px; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+.admin-panel-heading > span { display: grid; flex: 0 0 38px; width: 38px; height: 38px; place-items: center; border: 1px solid rgba(172,139,94,.5); border-radius: 50%; color: #a07d4d; font: italic 11px/1 Georgia, serif; }
+.admin-panel-heading h2 { margin: 1px 0 0; color: #4f4136; font: 400 21px/1.3 "Songti SC", serif; letter-spacing: .07em; }
+.admin-panel-heading p { margin: 7px 0 0; color: #857568; font-size: 11px; line-height: 1.65; }
+.admin-upload-form { display: grid; gap: 16px; margin-top: 20px; }
+.admin-upload-form label { display: flex; flex-direction: column; gap: 8px; color: #655448; font-size: 11px; letter-spacing: .07em; }
+.admin-upload-form input, .admin-upload-form select, .admin-filters select { width: 100%; min-height: 48px; padding: 0 13px; border: 1px solid rgba(156,126,87,.3); border-radius: 12px; background: #fffdf9; color: #4f4238; font: 400 13px/1 "Noto Sans SC", sans-serif; }
+.admin-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.admin-file-field { padding: 15px; border: 1px dashed rgba(158,128,87,.45); border-radius: 14px; background: rgba(244,236,224,.55); }
+.admin-file-field input { min-height: 44px; padding: 9px; background: #fff; }
+.admin-file-field small { color: #988573; font-size: 9px; line-height: 1.6; }
+.admin-submit { min-height: 56px; cursor: pointer; border: 1px solid rgba(255,255,255,.5); border-radius: 28px; background: linear-gradient(135deg, #a88755, #d0b181); color: #fffdf8; font-size: 13px; letter-spacing: .1em; box-shadow: 0 12px 28px rgba(132,101,59,.2); }
+.admin-submit:disabled { cursor: wait; opacity: .62; }
+.admin-message { margin: 16px 0 0; padding: 12px; border-radius: 10px; background: #f0e6d8; color: #6e5b47; font-size: 11px; line-height: 1.6; text-align: center; }
+.admin-filters { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 18px; }
+.admin-template-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-top: 18px; }
+.admin-template-card { overflow: hidden; border: 1px solid rgba(156,126,87,.24); border-radius: 16px; background: #fffdf9; }
+.admin-template-card > img { display: block; width: 100%; height: 210px; background: #eee5d8; object-fit: cover; }
+.admin-template-card > div { padding: 15px; }
+.admin-template-card h3 { margin: 0; color: #4e4035; font: 400 18px/1.35 "Songti SC", serif; letter-spacing: .04em; }
+.admin-template-card p { margin: 7px 0 0; color: #7c6b5d; font-size: 10px; }
+.admin-template-card span { display: block; margin-top: 8px; color: #a08d7b; font-size: 9px; }
+.admin-template-card button { width: 100%; min-height: 44px; margin-top: 14px; cursor: pointer; border: 1px solid rgba(151,119,81,.32); border-radius: 22px; background: transparent; color: #795f43; font-size: 11px; letter-spacing: .07em; }
+.admin-empty { margin: 18px 0 0; padding: 40px 15px; border: 1px dashed rgba(154,123,84,.3); border-radius: 14px; color: #8a7868; font-size: 11px; line-height: 1.7; text-align: center; }
+.admin-upload-form input:focus-visible, .admin-upload-form select:focus-visible, .admin-filters select:focus-visible, .admin-submit:focus-visible, .admin-template-card button:focus-visible, .admin-home-link:focus-visible { outline: 2px solid #806d50; outline-offset: 3px; }
+
+@media (max-width: 370px) {
+  .page-shell { width: calc(100% - 32px); }
+  .site-header { left: 24px; width: calc(100% - 48px); }
+  .brand-name { font-size: 14px; }
+  .hero { min-height: 690px; }
+  .hero-content { width: calc(100% - 48px); padding-bottom: 60px; }
+  .hero h1 { font-size: 36px; }
+  .template-preview { height: 438px; }
+  .preview-cute .poster-canvas { inset-inline: 25px; }
+}
+
+@media (min-width: 541px) {
+  body { padding-block: 24px; }
+  main { border: 1px solid rgba(116,91,67,.18); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: .01ms !important; }
+  .hero-video-fallback { animation: none; }
+}
