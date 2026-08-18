@@ -20,10 +20,7 @@ const targetUploadBytes = 9 * 1024 * 1024;
 const maxSourceBytes = 40 * 1024 * 1024;
 
 const styleOptions = [
-  ["cute", "卡通可爱风"],
-  ["gradient", "渐变小众风"],
-  ["korean", "韩系抠图简约风"],
-  ["traditional", "传统红底排版风"],
+  ["traditional", "红底排版"],
 ] as const;
 
 const sizeOptions = [

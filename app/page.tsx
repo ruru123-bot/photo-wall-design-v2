@@ -3,27 +3,9 @@ import HeroVideo from "./HeroVideo";
 const templates = [
   {
     index: "01",
-    title: "传统红底排版风",
+    title: "红底排版",
     description: "浓郁酒红与细腻金色相遇，喜庆大方，但不失现代质感。",
     className: "traditional",
-  },
-  {
-    index: "02",
-    title: "渐变小众风",
-    description: "低饱和渐变与杂志感构图，为婚礼现场增添艺术气息。",
-    className: "gradient",
-  },
-  {
-    index: "03",
-    title: "韩系抠图简约风",
-    description: "大面积留白配合人物抠图，干净、现代，把你们放在主角位。",
-    className: "korean",
-  },
-  {
-    index: "04",
-    title: "卡通可爱风",
-    description: "轻盈有趣的图形与明快排版，留住属于你们的俏皮瞬间。",
-    className: "cute",
   },
 ];
 

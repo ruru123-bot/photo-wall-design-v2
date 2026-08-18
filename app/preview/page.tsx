@@ -4,10 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 const styles = {
-  cute: { title: "卡通可爱风", english: "PLAYFUL WEDDING" },
-  gradient: { title: "渐变小众风", english: "EDITORIAL GRADIENT" },
-  korean: { title: "韩系抠图简约风", english: "KOREAN MINIMAL" },
-  traditional: { title: "传统红底排版风", english: "CLASSIC WEDDING" },
+  traditional: { title: "红底排版", english: "CLASSIC WEDDING" },
 } as const;
 
 const sizes = {
@@ -44,7 +41,7 @@ export default function PreviewPage() {
   const styleParam = searchParams.get("style");
   const sizeParam = searchParams.get("size");
   const selection: { style: StyleKey; size: SizeKey } = {
-    style: isStyleKey(styleParam) ? styleParam : "cute",
+    style: isStyleKey(styleParam) ? styleParam : "traditional",
     size: isSizeKey(sizeParam) ? sizeParam : "compact",
   };
   const [templates, setTemplates] = useState<TemplateAsset[]>([]);
