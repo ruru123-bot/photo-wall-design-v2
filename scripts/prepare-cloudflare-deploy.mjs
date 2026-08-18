@@ -8,6 +8,9 @@ const cloudflareConfig = {
   main: "index.js",
   compatibility_date: generated.compatibility_date || "2026-05-15",
   compatibility_flags: [...new Set(generated.compatibility_flags || ["nodejs_compat"])],
+  // Preserve runtime variables and secrets configured in the Cloudflare
+  // dashboard when Git-based deployments publish a new Worker version.
+  keep_vars: true,
   no_bundle: true,
   assets: {
     directory: "../client",
