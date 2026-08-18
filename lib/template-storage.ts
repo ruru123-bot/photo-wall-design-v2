@@ -49,7 +49,7 @@ type CloudinaryUploadResponse = CloudinaryResource & {
   error?: { message?: string };
 };
 
-const CLOUDINARY_ROOT = "wedding-photo-wall";
+const CLOUDINARY_ROOT = "jiangxin-wedding-wall-new";
 
 export class AdminAccessError extends Error {
   constructor(message: string, public status: number) {
